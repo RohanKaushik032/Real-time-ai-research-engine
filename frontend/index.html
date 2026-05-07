@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Insight AI — Research Assistant</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+
+<!-- ===== BACKGROUND AURORA ===== -->
+<div class="aurora-bg">
+  <div class="aurora-orb orb-1"></div>
+  <div class="aurora-orb orb-2"></div>
+  <div class="aurora-orb orb-3"></div>
+</div>
+
+<!-- ===== APP SHELL ===== -->
+<div class="app-shell">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <div class="logo-mark">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2L2 7l10 5 10-5-10-5z" fill="url(#lg1)"/>
+            <path d="M2 17l10 5 10-5M2 12l10 5 10-5" stroke="url(#lg2)" stroke-width="1.5" stroke-linecap="round"/>
+            <defs>
+              <linearGradient id="lg1" x1="2" y1="2" x2="22" y2="12" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#a78bfa"/>
+                <stop offset="100%" stop-color="#38bdf8"/>
+              </linearGradient>
+              <linearGradient id="lg2" x1="2" y1="12" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#a78bfa"/>
+                <stop offset="100%" stop-color="#38bdf8"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <span class="logo-text">Insight<em>AI</em></span>
+      </div>
+      <button class="sidebar-toggle" id="sidebarToggle" title="Toggle sidebar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 12h18M3 6h18M3 18h18"/>
+        </svg>
+      </button>
+    </div>
+
+    <button class="new-chat-btn" id="newChatBtn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M12 5v14M5 12h14"/>
+      </svg>
+      New Research
+    </button>
+
+    <div class="sidebar-search">
+      <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input type="text" id="chatSearch" placeholder="Search chats…" autocomplete="off" />
+    </div>
+
+    <nav class="chat-nav" id="chatNav">
+      <div class="chat-group" id="todayGroup">
+        <div class="group-label">Today</div>
+        <ul class="chat-list" id="todayList"></ul>
+      </div>
+      <div class="chat-group" id="yesterdayGroup">
+        <div class="group-label">Yesterday</div>
+        <ul class="chat-list" id="yesterdayList"></ul>
+      </div>
+      <div class="chat-group" id="olderGroup">
+        <div class="group-label">Older</div>
+        <ul class="chat-list" id="olderList"></ul>
+      </div>
+      <div class="empty-history" id="emptyHistory">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        <p>No chats yet</p>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <main class="main-area">
+
+    <!-- HEADER -->
+    <header class="main-header">
+      <div class="header-left">
+        <button class="mobile-menu-btn" id="mobileMenuBtn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 12h18M3 6h18M3 18h18"/>
+          </svg>
+        </button>
+        <div class="header-title">
+          <h1>AI Research Assistant</h1>
+        </div>
+      </div>
+      <div class="header-meta" id="headerMeta">
+        <div class="status-pill" id="statusPill">
+          <span class="status-dot"></span>
+          <span id="statusText">Ready</span>
+        </div>
+        <div class="meta-chips" id="metaChips" style="display:none">
+          <div class="meta-chip" id="modeChip">
+            <span class="chip-label">Mode</span>
+            <span class="chip-value" id="modeVal">—</span>
+          </div>
+          <div class="meta-chip" id="latencyChip">
+            <span class="chip-label">Latency</span>
+            <span class="chip-value" id="latencyVal">—</span>
+          </div>
+          <div class="meta-chip" id="confidenceChip">
+            <span class="chip-label">Confidence</span>
+            <span class="chip-value" id="confidenceVal">—</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- CHAT AREA -->
+    <div class="chat-area" id="chatArea">
+
+      <!-- WELCOME SCREEN -->
+      <div class="welcome-screen" id="welcomeScreen">
+        <div class="welcome-content">
+          <div class="welcome-badge">Powered by GPT-4o + Tavily</div>
+          <h2 class="welcome-title">Ask anything.</h2>
+          <p class="welcome-sub">Get structured, source-backed research in seconds.</p>
+
+          <div class="suggested-queries" id="suggestedQueries">
+            <button class="suggestion-btn" data-query="What are the latest breakthroughs in quantum computing?">
+              <span class="suggestion-icon">⚛️</span>
+              Latest quantum computing breakthroughs
+            </button>
+            <button class="suggestion-btn" data-query="How does CRISPR gene editing work and what are its applications?">
+              <span class="suggestion-icon">🧬</span>
+              How does CRISPR gene editing work?
+            </button>
+            <button class="suggestion-btn" data-query="Explain the economic impact of artificial intelligence on jobs">
+              <span class="suggestion-icon">📊</span>
+              Economic impact of AI on employment
+            </button>
+            <button class="suggestion-btn" data-query="What are the key differences between climate change and global warming?">
+              <span class="suggestion-icon">🌍</span>
+              Climate change vs global warming explained
+            </button>
+            <button class="suggestion-btn" data-query="How does the human immune system fight viruses?">
+              <span class="suggestion-icon">🦠</span>
+              How immune system fights viruses
+            </button>
+            <button class="suggestion-btn" data-query="What is the current state of nuclear fusion energy research?">
+              <span class="suggestion-icon">⚡</span>
+              Nuclear fusion energy research status
+            </button>
+          </div>
+
+          <div class="trending-section">
+            <div class="trending-label">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M3 17l4-8 4 4 4-6 4 10"/>
+              </svg>
+              Trending Topics
+            </div>
+            <div class="trending-chips">
+              <button class="trend-chip" data-query="GPT-5 capabilities and release">GPT-5</button>
+              <button class="trend-chip" data-query="SpaceX Starship latest mission update">Starship</button>
+              <button class="trend-chip" data-query="Bitcoin halving 2024 impact">BTC Halving</button>
+              <button class="trend-chip" data-query="Ozempic weight loss drug research">Ozempic</button>
+              <button class="trend-chip" data-query="AGI artificial general intelligence timeline">AGI Timeline</button>
+              <button class="trend-chip" data-query="Nuclear energy renaissance 2024">Nuclear Energy</button>
+            </div>
+          </div>
+
+          <div class="example-preview" id="examplePreview">
+            <div class="preview-header" id="previewToggle">
+              <div class="preview-title">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/>
+                </svg>
+                See example response
+              </div>
+              <svg class="preview-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="m6 9 6 6 6-6"/>
+              </svg>
+            </div>
+            <div class="preview-body" id="previewBody" style="display:none">
+              <div class="preview-query">"What causes aurora borealis?"</div>
+              <div class="preview-answer">
+                <strong>Answer:</strong> Auroras occur when charged particles from the sun interact with Earth's magnetic field and atmosphere, exciting gas molecules to emit light in green, blue, and red hues at altitudes of 100–300km.
+              </div>
+              <div class="preview-chips-row">
+                <span class="preview-chip">3 sources</span>
+                <span class="preview-chip">FAST mode</span>
+                <span class="preview-chip">94% confidence</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MESSAGES CONTAINER -->
+      <div class="messages-container" id="messagesContainer" style="display:none"></div>
+
+    </div>
+
+    <!-- INPUT BAR -->
+    <div class="input-bar-wrapper">
+      <div class="input-bar" id="inputBar">
+        <div class="input-actions-left">
+          <button class="input-icon-btn" title="Upload file (coming soon)" disabled>
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+            </svg>
+          </button>
+        </div>
+        <textarea
+          id="queryInput"
+          placeholder="Ask a research question…"
+          rows="1"
+          autocomplete="off"
+          spellcheck="false"
+        ></textarea>
+        <div class="input-actions-right">
+          <button class="input-icon-btn" title="Voice input (coming soon)" disabled>
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/>
+            </svg>
+          </button>
+          <button class="send-btn" id="sendBtn" title="Send (Enter)">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="input-hint">Press <kbd>Enter</kbd> to send · <kbd>Shift+Enter</kbd> for new line</div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ===== RENAME MODAL ===== -->
+<div class="modal-overlay" id="renameModal" style="display:none">
+  <div class="modal-card">
+    <div class="modal-title">Rename Chat</div>
+    <input type="text" class="modal-input" id="renameInput" placeholder="Chat title…" />
+    <div class="modal-actions">
+      <button class="modal-btn cancel" id="renameCancelBtn">Cancel</button>
+      <button class="modal-btn confirm" id="renameConfirmBtn">Rename</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TOAST ===== -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="/static/scripts.js"></script>
+</body>
+</html>
